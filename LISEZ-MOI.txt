@@ -1,0 +1,29 @@
+STATLAB 0.3 — PAQUET PWA PRÊT À HÉBERGER
+
+CONTENU
+- index.html : application StatLab (base version 0.2)
+- manifest.webmanifest : identité et paramètres d’installation
+- sw.js : cache des fichiers de l’application pour les visites hors ligne
+- icons/ : icônes d’application
+
+IMPORTANT
+Ce dossier n’est pas une application iPad installable tant qu’il n’est pas publié sur une adresse HTTPS. Ouvrir index.html depuis l’app Fichiers ne permet pas d’installer une PWA et peut empêcher l’exécution du JavaScript ou du service worker.
+
+MISE EN LIGNE
+1. Publier le contenu de ce dossier à la racine d’un hébergement statique HTTPS (par exemple GitHub Pages ou Cloudflare Pages).
+2. Ouvrir l’adresse HTTPS dans un navigateur sur l’iPad.
+3. Charger la page une première fois avec Internet afin que le service worker mette les fichiers de l’application en cache.
+4. Sur iPad, utiliser le menu de partage du navigateur puis « Sur l’écran d’accueil » si cette option est proposée. Safari est généralement le chemin le plus prévisible pour l’ajout à l’écran d’accueil sur iPadOS ; Brave peut être utilisé pour ouvrir l’adresse et tester l’application.
+5. Après la première visite et l’installation du cache, tester le mode avion.
+
+LIMITES DE CETTE VERSION
+- Le cache hors ligne couvre l’application elle-même, pas une synchronisation ni une sauvegarde distante.
+- Les projets et brouillons restent stockés dans le stockage local du navigateur. Exporter régulièrement les fichiers .statlab.
+- Le lecteur XLSX maison est expérimental ; privilégier CSV si un classeur pose problème.
+- Les modules Tests, Modélisation et Qualité laboratoire sont encore des espaces réservés.
+- Ne pas utiliser de données personnelles ou médico-légales réelles : ce prototype n’a pas été soumis à un audit de sécurité ni à une validation statistique professionnelle.
+
+TESTS EFFECTUÉS SUR LE PAQUET
+- Contrôle de syntaxe JavaScript avec Node.js.
+- Vérification de la présence des fichiers PWA et de leurs chemins relatifs.
+- Pas de validation sur un iPad physique ni d’hébergement HTTPS réalisé dans le cadre de cette livraison.
