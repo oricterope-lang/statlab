@@ -1,4 +1,4 @@
-const CACHE_NAME = 'statlab-shell-v03';
+const CACHE_NAME = 'statlab-shell-v04';
 const APP_SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));

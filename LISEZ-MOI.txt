@@ -1,29 +1,24 @@
-STATLAB 0.3 — PAQUET PWA PRÊT À HÉBERGER
+STATLAB 0.4 — PAQUET PWA DE TEST
 
 CONTENU
-- index.html : application StatLab (base version 0.2)
+- index.html : application StatLab 0.4
 - manifest.webmanifest : identité et paramètres d’installation
-- sw.js : cache des fichiers de l’application pour les visites hors ligne
+- sw.js : cache hors ligne (cache v04)
 - icons/ : icônes d’application
 
-IMPORTANT
-Ce dossier n’est pas une application iPad installable tant qu’il n’est pas publié sur une adresse HTTPS. Ouvrir index.html depuis l’app Fichiers ne permet pas d’installer une PWA et peut empêcher l’exécution du JavaScript ou du service worker.
+NOUVEAUTÉS EXPÉRIMENTALES
+- Comparaison de deux groupes indépendants : Student, Welch et Mann-Whitney (approximation normale).
+- Bland-Altman classique et logarithmique pour paires de mesures alignées ligne par ligne.
+- Biais moyen, limites d’accord, IC du biais, IC approximatifs des limites, recherche de biais proportionnel et graphique.
 
-MISE EN LIGNE
-1. Publier le contenu de ce dossier à la racine d’un hébergement statique HTTPS (par exemple GitHub Pages ou Cloudflare Pages).
-2. Ouvrir l’adresse HTTPS dans un navigateur sur l’iPad.
-3. Charger la page une première fois avec Internet afin que le service worker mette les fichiers de l’application en cache.
-4. Sur iPad, utiliser le menu de partage du navigateur puis « Sur l’écran d’accueil » si cette option est proposée. Safari est généralement le chemin le plus prévisible pour l’ajout à l’écran d’accueil sur iPadOS ; Brave peut être utilisé pour ouvrir l’adresse et tester l’application.
-5. Après la première visite et l’installation du cache, tester le mode avion.
+LIMITES IMPORTANTES
+Cette version est expérimentale et n’est pas validée pour un usage professionnel ou médico-légal. Les IC des limites d’accord sont approximatifs. Le test de pente ne prouve pas l’absence de biais proportionnel lorsqu’il n’est pas significatif. Les mesures répétées par sujet ne sont pas prises en charge. Chaque ligne doit correspondre à une paire de mesures du même échantillon. En mode logarithmique, toutes les valeurs doivent être strictement positives.
 
-LIMITES DE CETTE VERSION
-- Le cache hors ligne couvre l’application elle-même, pas une synchronisation ni une sauvegarde distante.
-- Les projets et brouillons restent stockés dans le stockage local du navigateur. Exporter régulièrement les fichiers .statlab.
-- Le lecteur XLSX maison est expérimental ; privilégier CSV si un classeur pose problème.
-- Les modules Tests, Modélisation et Qualité laboratoire sont encore des espaces réservés.
-- Ne pas utiliser de données personnelles ou médico-légales réelles : ce prototype n’a pas été soumis à un audit de sécurité ni à une validation statistique professionnelle.
+SÉCURITÉ ET DONNÉES
+Le traitement est conçu pour rester dans le navigateur ; aucun téléversement de données n’est prévu. Le stockage local n’est pas un coffre-fort. Ne pas charger de données nominatives, sensibles ou médico-légales réelles dans ce prototype. Exporter régulièrement les projets .statlab et les conserver dans un emplacement approuvé.
 
-TESTS EFFECTUÉS SUR LE PAQUET
-- Contrôle de syntaxe JavaScript avec Node.js.
-- Vérification de la présence des fichiers PWA et de leurs chemins relatifs.
-- Pas de validation sur un iPad physique ni d’hébergement HTTPS réalisé dans le cadre de cette livraison.
+MISE À JOUR
+Remplacer les fichiers index.html et sw.js à la racine du dépôt GitHub Pages. Conserver manifest.webmanifest et le dossier icons. Après publication, recharger l’application ; si l’ancienne version persiste, fermer l’onglet puis le rouvrir ou vider les données du site dans le navigateur.
+
+VALIDATION
+Contrôles de syntaxe JavaScript et vérifications de fonctionnement élémentaire à effectuer avant utilisation. Aucun audit de sécurité, validation métrologique, ni validation statistique indépendante n’a été réalisé.
