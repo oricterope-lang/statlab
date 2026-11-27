@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#17324d">
+<title>StatQualité I-MR — Surveillance des témoins</title>
+<style>
+:root{
+  --navy:#17324d;--navy2:#234863;--teal:#0c8178;--teal-soft:#e7f5f2;
+  --ink:#1d2b36;--muted:#61717d;--line:#dce4e9;--surface:#ffffff;--bg:#f3f6f8;
+  --green:#16794b;--green-bg:#e8f5ed;--amber:#a56508;--amber-bg:#fff3d9;
+  --red:#b42318;--red-bg:#fdecea;--blue:#2664a5;--blue-bg:#eaf2fb;
+  --shadow:0 10px 28px rgba(23,50,77,.08);--radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.45}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app-shell{min-height:100vh}
+.topbar{background:linear-gradient(115deg,var(--navy),#1d5365);color:#fff;padding:18px clamp(16px,3vw,34px);display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:13px;min-width:250px}
+.brand-mark{width:42px;height:42px;border-radius:13px;background:rgba(255,255,255,.13);display:grid;place-items:center;border:1px solid rgba(255,255,255,.25)}
+.brand-mark svg{width:26px;height:26px}
+.brand h1{font-size:19px;line-height:1.1;margin:0;font-weight:750;letter-spacing:.1px}
+.brand p{margin:4px 0 0;color:#c9d9e2;font-size:12px}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:9px 13px;font-weight:650;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:.15s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(10,30,50,.10)}
+.btn:focus-visible,.nav-btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(12,129,120,.24);outline-offset:2px}
+.btn-primary{background:var(--teal);border-color:var(--teal);color:white}
+.btn-dark{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.27);color:white}
+.btn-danger{color:var(--red);border-color:#f0c4c0;background:#fff}
+.btn-small{padding:6px 9px;font-size:12px;border-radius:8px}
+.btn-quiet{background:transparent;border-color:transparent;color:var(--muted)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.nav-wrap{background:#fff;border-bottom:1px solid var(--line);padding:0 clamp(12px,3vw,34px);overflow-x:auto}
+.nav{display:flex;gap:5px;min-width:max-content}
+.nav-btn{border:0;background:transparent;padding:15px 15px 13px;color:var(--muted);font-size:13px;font-weight:700;border-bottom:3px solid transparent}
+.nav-btn.active{color:var(--teal);border-bottom-color:var(--teal)}
+main{max-width:1440px;margin:0 auto;padding:26px clamp(14px,3vw,34px) 54px}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:21px}
+.eyebrow{text-transform:uppercase;letter-spacing:.1em;color:var(--teal);font-size:10px;font-weight:800;margin-bottom:5px}
+h2{margin:0;font-size:clamp(23px,3vw,30px);letter-spacing:-.03em;color:var(--navy)}
+.subtitle{color:var(--muted);font-size:14px;margin:7px 0 0;max-width:780px}
+h3{margin:0;font-size:17px;color:var(--navy)}
+h4{margin:0 0 7px;font-size:14px;color:var(--navy)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card-pad{padding:20px}
+.grid{display:grid;gap:16px}
+.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0 22px}
+.metric{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+.metric .label{color:var(--muted);font-size:11px;font-weight:700}
+.metric .value{font-size:25px;color:var(--navy);font-weight:780;margin-top:5px;letter-spacing:-.03em}
+.metric .hint{color:var(--muted);font-size:11px;margin-top:2px}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;border-radius:99px;padding:5px 9px;white-space:nowrap}
+.status::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.status.stable{color:var(--green);background:var(--green-bg)}
+.status.warning{color:var(--amber);background:var(--amber-bg)}
+.status.action{color:var(--red);background:var(--red-bg)}
+.status.pending{color:var(--blue);background:var(--blue-bg)}
+.status.neutral{color:var(--muted);background:#edf1f4}
+.chart-card{padding:18px;min-width:0}
+.chart-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:9px}
+.chart-head p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.chart-wrap{width:100%;overflow:hidden;min-height:260px}
+.chart-wrap svg{display:block;width:100%;height:auto;min-height:250px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin-top:6px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:17px;height:3px;border-radius:3px;display:inline-block}
+.card-tile{padding:18px;display:flex;flex-direction:column;gap:12px;min-height:205px}
+.tile-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.tile-icon{width:40px;height:40px;border-radius:12px;background:var(--teal-soft);color:var(--teal);display:grid;place-items:center;font-size:19px}
+.tile-title{font-weight:780;color:var(--navy);font-size:16px;margin:0}
+.tile-desc{font-size:12px;color:var(--muted);margin:5px 0 0;line-height:1.5}
+.tile-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-size:11px}
+.tile-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:12px;border-top:1px solid var(--line)}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0 12px}
+.section-title p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.notice{border:1px solid #cfe3e1;background:#f0f8f7;border-radius:13px;padding:13px 15px;color:#28514e;font-size:13px;margin:16px 0}
+.notice strong{color:#164d47}
+.notice.warning-note{background:#fff8e8;border-color:#f0dfb8;color:#70501c}
+.notice.info-note{background:#eef4fb;border-color:#d1deee;color:#345779}
+.form-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-size:11px;color:var(--muted);font-weight:750}
+.field input,.field select,.field textarea{border:1px solid #cbd6de;border-radius:9px;background:#fff;padding:10px 11px;color:var(--ink);min-width:0;width:100%}
+.field textarea{min-height:78px;resize:vertical}
+.field small{font-size:10px;color:var(--muted)}
+.form-actions{display:flex;justify-content:flex-end;gap:8px;align-items:center;margin-top:14px;flex-wrap:wrap}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:#fff}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:12px}
+th,td{padding:10px 12px;border-bottom:1px solid #edf1f4;text-align:left;white-space:nowrap}
+th{background:#f7f9fa;color:#5a6a76;font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:800;position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#fafcfd}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.cell-actions{display:flex;gap:5px}
+.empty{padding:24px;text-align:center;color:var(--muted);font-size:13px}
+.tabs-inline{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:15px}
+.pill-btn{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:100px;padding:8px 12px;font-size:12px;font-weight:750}
+.pill-btn.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.two-col{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(270px,.75fr);gap:16px;align-items:start}
+.info-stack{display:flex;flex-direction:column;gap:12px}
+.info-block{border:1px solid var(--line);border-radius:13px;padding:15px;background:#fff}
+.info-block p{margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.6}
+.info-block ul{margin:8px 0 0;padding-left:18px;font-size:12px;color:var(--muted)}
+.info-block li{margin:4px 0}
+.callout{border-left:4px solid var(--teal);background:#f1f8f7;padding:12px 14px;border-radius:0 10px 10px 0;color:#375b58;font-size:12px;margin-top:10px}
+.kbd{font-size:10px;padding:2px 6px;border:1px solid var(--line);border-radius:5px;background:#f8fafb;color:var(--muted)}
+.mini-stat{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:7px 0;border-bottom:1px solid #edf1f4}
+.mini-stat:last-child{border-bottom:0}
+.mini-stat span{color:var(--muted)}
+.mini-stat strong{font-variant-numeric:tabular-nums;color:var(--navy)}
+.hidden{display:none!important}
+.footer{margin-top:34px;color:#81909b;font-size:10px;text-align:center}
+.dialog-backdrop{position:fixed;inset:0;background:rgba(12,28,42,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:20}
+.dialog-backdrop.open{display:flex}
+.dialog{width:min(680px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 25px 70px rgba(0,0,0,.22);padding:22px}
+.dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.dialog-head h3{font-size:19px}
+.dialog-close{border:0;background:#eef2f5;width:32px;height:32px;border-radius:9px;font-size:18px;color:var(--muted)}
+.modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.toast{position:fixed;right:18px;bottom:18px;z-index:50;background:#18364e;color:#fff;padding:12px 16px;border-radius:11px;box-shadow:var(--shadow);font-size:13px;max-width:min(420px,calc(100vw - 36px));opacity:0;transform:translateY(12px);pointer-events:none;transition:.2s}
+.toast.show{opacity:1;transform:translateY(0)}
+@media(max-width:950px){.grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two-col{grid-template-columns:1fr}}
+@media(max-width:600px){.topbar{padding:14px}.brand{min-width:0}.brand h1{font-size:17px}.top-actions{width:100%}.top-actions .btn{flex:1}.grid-3,.grid-2{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.metric{padding:11px}.metric .value{font-size:21px}.form-grid{grid-template-columns:1fr 1fr}.card-pad{padding:15px}.chart-card{padding:12px}.nav-btn{padding:13px 11px;font-size:12px}main{padding-top:20px}.page-head{margin-bottom:16px}}
+@media(max-width:390px){.form-grid{grid-template-columns:1fr}.top-actions .btn{font-size:11px;padding:8px}.metrics{grid-template-columns:1fr 1fr}}
+
+.import-box{border:1px solid var(--line);background:#fff;border-radius:14px;padding:18px}
+.import-step{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fbfcfd;margin-top:12px}
+.import-preview{max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:12px}
+.import-preview table{min-width:640px}
+.import-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+.import-summary .metric{margin:0}
+.field input[type=file]{padding:8px;background:#fbfcfd}
+@media(max-width:720px){.import-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M4 24.5h24M6 21l6-7 5 3 8-10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="14" r="2" fill="#83d8ca"/><circle cx="17" cy="17" r="2" fill="#83d8ca"/><circle cx="25" cy="7" r="2" fill="#83d8ca"/></svg></div>
+      <div><h1>StatQualité I-MR</h1><p>Surveillance statistique des témoins d'extraction ADN</p></div>
+    </div>
+    <div class="top-actions">
+      <button class="btn btn-dark" id="exportJsonBtn" type="button">↓ Sauvegarder</button>
+      <button class="btn btn-dark" id="importJsonBtn" type="button">↑ Restaurer</button>
+      <input id="importJsonFile" type="file" accept="application/json,.json" class="hidden">
+    </div>
+  </header>
+  <div class="nav-wrap"><nav class="nav" aria-label="Navigation principale">
+    <button class="nav-btn active" data-page="dashboard">Tableau de bord</button>
+    <button class="nav-btn" data-page="monitor">Cartes I-MR</button>
+    <button class="nav-btn" data-page="import">Importer des données</button>
+    <button class="nav-btn" data-page="learn">Comprendre et exploiter</button>
+    <button class="nav-btn" data-page="history">Données et alertes</button>
+    <button class="nav-btn" data-page="settings">Référentiels</button>
+  </nav></div>
+  <main>
+    <section id="page-dashboard" class="page">
+      <div class="page-head"><div><div class="eyebrow">Vue d'ensemble</div><h2>Surveillance des témoins</h2><p class="subtitle">Un aperçu des trois cartes de contrôle paramétrées. Les témoins chargé / peu chargé partagent un référentiel ; F1 et F2 disposent chacun de leurs limites propres.</p></div><button class="btn btn-primary" data-go="monitor" data-card="lysis">Ouvrir la carte active →</button></div>
+      <div class="metrics" id="dashboardMetrics"></div>
+      <div class="section-title"><div><h3>Les trois cartes de surveillance</h3><p>Chaque carte possède son propre historique et ses propres limites.</p></div></div>
+      <div class="grid grid-3" id="dashboardCards"></div>
+      <div class="notice info-note"><strong>À retenir :</strong> les témoins chargés et peu chargés sont regroupés dans une seule carte, car ils relèvent du même témoin et de la même méthode de lyse. Leur modalité reste enregistrée pour permettre un filtrage descriptif, sans créer deux calculs statistiques distincts.</div>
+    </section>
+
+    <section id="page-monitor" class="page hidden">
+      <div class="page-head"><div><div class="eyebrow">Surveillance en routine</div><h2>Cartes de contrôle I-MR</h2><p class="subtitle">Sélectionne une carte pour consulter les mesures, les graphiques et les signaux détectés.</p></div><button class="btn" id="exportCsvBtn">↓ Exporter les données CSV</button></div>
+      <div class="tabs-inline" id="cardTabs"></div>
+      <div id="monitorContent"></div>
+    </section>
+
+    <section id="page-import" class="page hidden">
+      <div class="page-head"><div><div class="eyebrow">Import de données</div><h2>Importer un fichier CSV ou Excel</h2><p class="subtitle">Ajoute un ensemble de mesures à l'une des trois cartes. Les limites statistiques restent fixes ; seules les données de surveillance sont ajoutées.</p></div><button class="btn btn-primary" id="downloadTemplateBtn" type="button">↓ Télécharger le modèle Excel</button></div>
+      <div class="notice info-note"><strong>Point essentiel :</strong> l'ordre chronologique des mesures détermine le calcul des étendues mobiles. Vérifie que les lignes du fichier suivent l'ordre réel des runs ou demande un tri par date lorsque toutes les dates sont disponibles. <br><strong>Attention :</strong> cette fonction sert à importer les mesures de surveillance en routine. Les classeurs historiques ayant servi à établir les limites doivent rester archivés séparément : ne les importe pas dans la série courante, sauf si tu souhaites volontairement les intégrer à cette surveillance.</div>
+      <div class="card card-pad">
+        <div class="form-grid">
+          <div class="field"><label for="importCard">Carte destinataire</label><select id="importCard"><option value="lysis">Témoins de lyse — chargé et peu chargé</option><option value="f1">Lyse différentielle — F1 spermatique</option><option value="f2">Lyse différentielle — F2 épithéliale</option></select></div>
+          <div class="field"><label for="importMode">Mode d'intégration</label><select id="importMode"><option value="append">Ajouter aux données existantes</option><option value="replace">Remplacer les données de cette carte</option></select><small>Le remplacement ne touche pas aux deux autres cartes ni aux limites.</small></div>
+          <div class="field"><label for="importOrder">Ordre des mesures</label><select id="importOrder"><option value="file">Conserver l'ordre des lignes du fichier</option><option value="date">Trier toute la série par date croissante</option></select><small>Le tri par date nécessite une date valide pour chaque mesure de la série finale.</small></div>
+          <div class="field"><label for="dataImportFile">Fichier à importer</label><input id="dataImportFile" type="file" accept=".csv,.txt,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"><small>CSV (séparateur ; , ou tabulation) ou classeur XLSX.</small></div>
+        </div>
+        <div id="importMessage" class="notice" style="margin-bottom:0">Choisis la carte, le mode d'intégration, puis sélectionne ton fichier.</div>
+        <div id="importConfig" class="hidden"></div>
+      </div>
+      <div class="card card-pad" style="margin-top:16px"><h3>Règles de sécurité de l'import</h3><div class="grid grid-2" style="margin-top:12px"><div class="info-block"><h4>Contrôle des données</h4><p>L'identifiant est obligatoire. Une concentration vide est conservée comme résultat non exploitable ; zéro est conservé mais exclu du logarithme. Les valeurs négatives ou non numériques sont signalées et non importées.</p></div><div class="info-block"><h4>Doublons et référentiels</h4><p>Les identifiants déjà présents (ou répétés dans le fichier) sont ignorés en mode ajout. Les paramètres CL, alertes, limites d'action et UCL MR ne sont jamais recalculés par l'import.</p></div></div></div>
+    </section>
+
+    <section id="page-learn" class="page hidden">
+      <div class="page-head"><div><div class="eyebrow">Aide intégrée</div><h2>Comprendre et exploiter les cartes</h2><p class="subtitle">Les cartes I-MR ne servent pas seulement à visualiser des concentrations : elles aident à surveiller la stabilité du procédé et à décider quand investiguer.</p></div></div>
+      <div class="two-col">
+        <div class="info-stack">
+          <div class="card card-pad"><h3>1. Pourquoi surveiller un témoin avec une carte I-MR ?</h3><p class="subtitle">Un témoin est suivi dans le temps pour repérer si le fonctionnement habituel du procédé se maintient.</p><div class="grid grid-2" style="margin-top:14px">
+            <div class="info-block"><h4>Variations habituelles</h4><p>Les mesures fluctuent naturellement d'un run à l'autre. Lorsque ces variations restent compatibles avec la période de référence, le procédé est considéré comme statistiquement stable au regard des règles suivies.</p></div>
+            <div class="info-block"><h4>Variations inhabituelles</h4><p>Un point éloigné, une hausse soudaine de la variabilité ou un signal répété peut indiquer une cause particulière à rechercher : lot, réactif, préparation, manipulation, instrument ou erreur de saisie.</p></div>
+          </div><div class="callout"><strong>Ce que la carte apporte :</strong> elle aide à détecter un changement du procédé plus tôt qu'une lecture isolée des résultats. Elle ne remplace ni les critères analytiques de conformité ni l'investigation technique.</div></div>
+          <div class="card card-pad"><h3>2. Les deux graphiques sont complémentaires</h3><div class="grid grid-2" style="margin-top:14px">
+            <div class="info-block"><h4>Carte I — Individus</h4><p>Chaque point représente le log10 de la concentration CADN_H d'un témoin. La carte suit le niveau du témoin dans le temps et permet de repérer une mesure exceptionnellement haute ou basse par rapport au comportement de référence.</p><ul><li>Une valeur au-delà de ±2σ déclenche une vigilance.</li><li>Une valeur au-delà de ±3σ déclenche une investigation.</li></ul></div>
+            <div class="info-block"><h4>Carte MR — Étendues mobiles</h4><p>Chaque point représente la différence absolue entre deux valeurs logarithmiques positives successives. Elle suit l'amplitude des variations à court terme, indépendamment du niveau moyen.</p><ul><li>Une MR au-dessus de sa limite supérieure signale une variation inhabituelle entre deux mesures.</li><li>Il n'y a pas de limite inférieure d'action sur cette carte.</li></ul></div>
+          </div><div class="callout">Dans cette application, les deux cartes utilisent la même variable transformée : <strong>log10(CADN_H)</strong>. Le MR est calculé sur cette échelle logarithmique, afin de rester cohérent avec les limites établies sur les données historiques recentrées.</div></div>
+          <div class="card card-pad"><h3>3. Comment lire les seuils ?</h3><div class="table-wrap" style="margin-top:12px"><table style="min-width:540px"><thead><tr><th>Zone</th><th>Interprétation</th><th>Conduite proposée</th></tr></thead><tbody><tr><td><span class="status stable">Dans les limites</span></td><td>Pas de signal selon les règles activées.</td><td>Poursuivre la surveillance habituelle.</td></tr><tr><td><span class="status warning">Entre 2σ et 3σ</span></td><td>Signal de vigilance sur la carte I.</td><td>Vérifier la mesure et rester attentif aux résultats suivants.</td></tr><tr><td><span class="status action">Au-delà de 3σ</span></td><td>Signal d'action sur la carte I, ou MR au-dessus de sa limite.</td><td>Ouvrir une investigation et documenter les vérifications.</td></tr></tbody></table></div><p class="subtitle" style="font-size:11px">Les seuils ±2σ et ±3σ sont ceux décrits dans les rapports méthodologiques. La carte MR utilise la limite supérieure d'action paramétrée dans le référentiel.</p></div>
+          <div class="card card-pad"><h3>4. Que faire lorsqu'un signal apparaît ?</h3><ol style="padding-left:20px;color:var(--muted);font-size:13px;line-height:1.7"><li><strong style="color:var(--ink)">Vérifier la donnée :</strong> identifiant du run, unité, valeur saisie et transcription du résultat.</li><li><strong style="color:var(--ink)">Vérifier le contexte :</strong> lot de témoin, réactifs, préparation, opérateur, équipement et événements inhabituels.</li><li><strong style="color:var(--ink)">Examiner les deux cartes :</strong> une anomalie du niveau (I) et une variation brutale (MR) n'apportent pas la même information.</li><li><strong style="color:var(--ink)">Documenter :</strong> consigner les vérifications, la cause éventuelle et les mesures prises dans le commentaire de la mesure.</li><li><strong style="color:var(--ink)">Ne pas recalculer les limites à chaud :</strong> toute révision du référentiel doit faire l'objet d'une étude et d'une validation distinctes.</li></ol><div class="callout"><strong>Important :</strong> un signal statistique n'identifie pas sa cause. Il déclenche une vérification ; il ne démontre pas à lui seul une non-conformité analytique.</div></div>
+          <div class="card card-pad"><h3>5. Pourquoi trois cartes distinctes ?</h3><p class="subtitle">Les témoins de lyse chargés et peu chargés sont réunis sur une carte commune, car ils correspondent au même témoin et à la même méthode. La modalité de charge reste une information descriptive. La lyse différentielle est surveillée séparément pour la fraction spermatique (F1) et la fraction épithéliale (F2), chacune avec ses propres limites.</p></div>
+        </div>
+        <aside class="info-stack">
+          <div class="card card-pad"><h3>Ce que les cartes ne disent pas</h3><ul style="padding-left:18px;color:var(--muted);font-size:12px;line-height:1.65"><li>Elles ne disent pas à elles seules si une concentration répond à une spécification analytique.</li><li>Elles ne garantissent pas l'absence de contamination ou d'erreur.</li><li>Elles ne déterminent pas automatiquement la cause d'un signal.</li><li>Elles ne doivent pas être interprétées sans tenir compte du contexte du run.</li></ul></div>
+          <div class="card card-pad"><h3>Limites et méthode</h3><div class="mini-stat"><span>Variable suivie</span><strong>log10(CADN_H)</strong></div><div class="mini-stat"><span>Étendue mobile</span><strong>|Xᵢ − Xᵢ₋₁|</strong></div><div class="mini-stat"><span>Estimation de σ historique</span><strong>MR̄ / 1,128</strong></div><div class="mini-stat"><span>Limites de référence</span><strong>Fixes</strong></div><p class="subtitle" style="font-size:11px;margin-top:10px">Les limites de la première carte proviennent de l'étude historique multi-annuelle avec identification des zones de rupture et recentrage. Elles ne sont pas recalculées par l'application.</p></div>
+          <div class="card card-pad"><h3>Règles activées dans cette version</h3><p class="subtitle" style="font-size:12px">La version initiale signale les franchissements des limites de vigilance et d'action de la carte I, ainsi que le dépassement de la limite supérieure de MR. Les règles de séries, tendances ou alternances ne sont pas encore activées : elles devront être choisies et validées explicitement avant leur ajout.</p></div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="page-history" class="page hidden">
+      <div class="page-head"><div><div class="eyebrow">Traçabilité</div><h2>Données et alertes</h2><p class="subtitle">Consulte les mesures enregistrées, les signaux statistiques et les commentaires d'investigation.</p></div><div class="top-actions"><button class="btn" id="historyExportCsvBtn">↓ Exporter CSV</button><button class="btn btn-primary" data-go="monitor" data-card="lysis">+ Ajouter une mesure</button></div></div>
+      <div class="tabs-inline" id="historyTabs"></div>
+      <div class="metrics" id="historyMetrics"></div>
+      <div class="section-title"><div><h3>Historique des signaux</h3><p>Les alertes restent consultables même si les mesures suivantes reviennent dans les limites.</p></div></div>
+      <div class="table-wrap" id="alertTableWrap"></div>
+      <div class="section-title"><div><h3>Toutes les mesures</h3><p>Les valeurs nulles et les résultats non renseignés sont conservés, mais exclus des calculs logarithmiques.</p></div></div>
+      <div class="table-wrap" id="allDataTableWrap"></div>
+      <div class="section-title"><div><h3>Journal des opérations</h3><p>Historique local des saisies, modifications, suppressions, imports et changements de référentiel.</p></div></div>
+      <div class="table-wrap" id="auditLogTable"></div>
+    </section>
+
+    <section id="page-settings" class="page hidden">
+      <div class="page-head"><div><div class="eyebrow">Référentiels statistiques</div><h2>Paramètres des cartes</h2><p class="subtitle">Les limites sont propres à chaque carte. Elles restent fixes pendant la surveillance courante et ne doivent être modifiées qu'après une nouvelle étude validée.</p></div></div>
+      <div class="notice info-note"><strong>Protection des limites :</strong> les trois cartes disposent de leurs référentiels validés. L’import de nouvelles mesures ne modifie jamais les limites de contrôle.</div>
+      <div class="grid grid-3" id="settingsCards"></div>
+      <div class="card card-pad" style="margin-top:16px"><h3>Origine du référentiel actif</h3><p class="subtitle">La première carte utilise les paramètres enregistrés dans « carte contrôle format qualité.xlsx ». Le classeur historique « donnees-cartecontroleTplus salive.xlsx » documente la construction par zones et le recentrage sur plusieurs années. Les paramètres opérationnels du classeur de suivi sont conservés à leur précision d'origine.</p><div class="mini-stat"><span>Étude historique</span><strong>3 352 lignes environ</strong></div><div class="mini-stat"><span>Zones homogènes</span><strong>5 zones · 4 ruptures</strong></div><div class="mini-stat"><span>Référence de recentrage</span><strong>Zone 5</strong></div><div class="mini-stat"><span>MR historique moyen non arrondi</span><strong>0,2187497</strong></div><div class="mini-stat"><span>Écart-type estimé historique</span><strong>0,1939270</strong></div><p class="subtitle" style="font-size:11px;margin-top:10px">La limite MR opérationnelle de 0,7187 est reprise telle quelle depuis le classeur de suivi ; elle n'est pas recalculée par cette application.</p></div>
+    </section>
+    <div class="footer">StatQualité I-MR · Version 1.2.2 · Données conservées localement et sauvegardables en JSON</div>
+  </main>
+</div>
+
+<div class="dialog-backdrop" id="dialogBackdrop" role="presentation">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+    <div class="dialog-head"><div><div class="eyebrow" id="dialogEyebrow">Saisie</div><h3 id="dialogTitle">Nouvelle mesure</h3></div><button class="dialog-close" id="dialogClose" aria-label="Fermer">×</button></div>
+    <div id="dialogBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+const STORAGE_KEY='statqualite-imr-v1';
+const cardsMeta={
+  lysis:{id:'lysis',title:'Témoins de lyse — chargé et peu chargé',short:'Témoins de lyse',subtitle:'Carte commune · une seule méthode et un même témoin',icon:'◉',configured:true,variable:'log10(CADN_H)',source:'Classeur de suivi : carte contrôle format qualité.xlsx',limits:{CL:-1.02,LWL:-1.41,UWL:-0.64,LCL:-1.607,UCL:-0.44,CLMR:0.22,UCLMR:0.7187}},
+  f1:{id:'f1',title:'Lyse différentielle — fraction spermatique (F1)',short:'Différentielle · F1 spermatique',subtitle:'Carte indépendante · référentiel validé',icon:'◌',configured:true,variable:'log10(CADN_H)',source:'Etablissement parametres F1.xlsx · 462 mesures de référence',limits:{CL:-0.186,LWL:-0.815432624113475,UWL:0.443432624113475,LCL:-1.13014893617021,UCL:0.758148936170213,CLMR:0.355,UCLMR:1.159785}},
+  f2:{id:'f2',title:'Lyse différentielle — fraction épithéliale (F2)',short:'Différentielle · F2 épithéliale',subtitle:'Carte indépendante · référentiel recalculé et validé',icon:'◍',configured:true,variable:'log10(CADN_H)',source:'Etablissement parametres carte F2.xlsx · 462 mesures · paramètres recalculés après vérification des formules',limits:{CL:-1.14822057013845,LWL:-1.9519517682801992,UWL:-0.3444893719966938,LCL:-2.353817367351075,UCL:0.05737622707418244,CLMR:0.4533043957519484,UCLMR:1.4809454609216155}}
+};
+const seedRows=[
+ ['26_0381',0.13],['26_0382',0.15],['26_0383',0.16],['26_0384',0.20],['26_0385',0.16],['26_0387',0.17],['26_0389',0.10],['26_0392',0.22],['26_0394',0.18],['26_0395',0.26],['26_0396',null],['26_0398',null],['26_0399',0.17],['26_0400',0.15],['26_0401',null]
+];
+function initialState(){
+ const now=new Date().toISOString();
+ const entries=seedRows.map((r,i)=>({uid:'seed-'+(i+1),id:r[0],date:null,cadn:r[1],modality:'Non renseignée',note:'',createdAt:now,updatedAt:null,origin:'Classeur initial'}));
+ return {version:1,createdAt:now,updatedAt:now,selectedCard:'lysis',cards:{lysis:{configured:true,limits:{...cardsMeta.lysis.limits},entries},f1:{configured:true,limits:{...cardsMeta.f1.limits},entries:[]},f2:{configured:true,limits:{...cardsMeta.f2.limits},entries:[]}},audit:[{at:now,cardId:'lysis',action:'Import initial',detail:'15 enregistrements importés depuis le classeur de suivi ; 12 concentrations renseignées et 3 non renseignées.'}]};
+}
+let state;
+try{const saved=localStorage.getItem(STORAGE_KEY);state=saved?JSON.parse(saved):initialState();if(!state.cards||!state.cards.lysis)state=initialState();}
+catch(e){state=initialState();}
+// Migration systématique des référentiels F1/F2 validés. Elle est volontairement hors du try/catch
+// afin de s'appliquer aussi lorsque le navigateur bloque l'accès au stockage local.
+for(const id of ['f1','f2']){
+  if(!state.cards[id]) state.cards[id]={configured:true,limits:{...cardsMeta[id].limits},entries:[]};
+  if(!state.cards[id].configured || !state.cards[id].limits){state.cards[id].configured=true;state.cards[id].limits={...cardsMeta[id].limits};}
+  if(!Array.isArray(state.cards[id].entries)) state.cards[id].entries=[];
+}
+let currentPage='dashboard';
+let activeCard=state.selectedCard||'lysis';
+let editUid=null;
+let toastTimer=null;
+let importDraft=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=(n,d=3)=>Number.isFinite(n)?n.toLocaleString('fr-FR',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const fmtDate=d=>d?new Date(d+'T12:00:00').toLocaleDateString('fr-FR'):'—';
+const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+function save(){state.updatedAt=new Date().toISOString();try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){toast('La sauvegarde du navigateur a échoué. Exporte une sauvegarde JSON.');}}
+function logAudit(cardId,action,detail){state.audit=state.audit||[];state.audit.unshift({at:new Date().toISOString(),cardId,action,detail});if(state.audit.length>500)state.audit.length=500;}
+function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3100);}
+function getCard(id){return state.cards[id]||{configured:false,limits:null,entries:[]};}
+function validValues(cardId){return getCard(cardId).entries.filter(e=>Number.isFinite(Number(e.cadn))&&e.cadn!==null&&Number(e.cadn)>0);}
+function analyze(cardId){
+ const card=getCard(cardId),limits=card.limits;
+ const valid=card.entries.filter(e=>e.cadn!==null&&e.cadn!==''&&Number.isFinite(Number(e.cadn))&&Number(e.cadn)>0);
+ let prev=null;
+ const points=valid.map((e,i)=>{
+  const x=Math.log10(Number(e.cadn));
+  const mr=prev===null?null:Math.abs(x-prev.x);
+  let iStatus='stable',mrStatus='stable';
+  if(limits){if(x<limits.LCL||x>limits.UCL)iStatus='action';else if(x<limits.LWL||x>limits.UWL)iStatus='warning';if(mr!==null&&mr>limits.UCLMR)mrStatus='action';}
+  const p={...e,x,mr,iStatus,mrStatus,index:i+1,previousId:prev?prev.id:null};prev={x,id:e.id};return p;
+ });
+ const latest=points.length?points[points.length-1]:null;
+ const overall=!card.configured||!limits?'pending':!latest?'neutral':(latest.iStatus==='action'||latest.mrStatus==='action'?'action':latest.iStatus==='warning'?'warning':'stable');
+ const alerts=[];
+ if(limits){for(const p of points){if(p.iStatus!=='stable')alerts.push({id:p.id,uid:p.uid,kind:'I',status:p.iStatus,value:p.x,detail:p.iStatus==='action'?'Valeur au-delà d’une limite d’action (±3σ).':'Valeur au-delà d’une limite d’alerte (±2σ).',note:p.note||''});if(p.mrStatus==='action')alerts.push({id:p.id,uid:p.uid,kind:'MR',status:'action',value:p.mr,detail:'Étendue mobile au-dessus de la limite supérieure MR.',note:p.note||''});}}
+ return {points,latest,overall,alerts,rawCount:card.entries.length,validCount:valid.length,missingCount:card.entries.length-valid.length};
+}
+function statusLabel(s){return ({stable:'Stable',warning:'Vigilance',action:'Action requise',pending:'Limites à renseigner',neutral:'Aucune mesure exploitable'})[s]||s;}
+function statusHtml(s){return `<span class="status ${s}">${statusLabel(s)}</span>`;}
+function switchPage(page){currentPage=page;document.querySelectorAll('.page').forEach(p=>p.classList.toggle('hidden',p.id!=='page-'+page));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===page));renderPage();window.scrollTo({top:0,behavior:'smooth'});}
+function selectCard(id){activeCard=id;state.selectedCard=id;save();switchPage('monitor');}
+function goFromButton(btn){if(btn.dataset.card)activeCard=btn.dataset.card;switchPage(btn.dataset.go);}
+function renderPage(){if(currentPage==='dashboard')renderDashboard();if(currentPage==='monitor')renderMonitor();if(currentPage==='import')renderImportPage();if(currentPage==='history')renderHistory();if(currentPage==='settings')renderSettings();}
+function countStatus(){let all=[];for(const id of Object.keys(cardsMeta)){if(getCard(id).configured){const a=analyze(id);all.push(...a.alerts);}}return all;}
+function renderDashboard(){
+ const m=$('dashboardMetrics');const first=analyze('lysis');const allAlerts=countStatus();const latest=first.latest;
+ m.innerHTML=`<div class="metric"><div class="label">Cartes prévues</div><div class="value">3</div><div class="hint">3 référentiels configurés</div></div><div class="metric"><div class="label">Mesures exploitables · carte commune</div><div class="value">${first.validCount}</div><div class="hint">${first.missingCount} résultat(s) nul(s) ou non renseigné(s)</div></div><div class="metric"><div class="label">Signaux historiques</div><div class="value">${allAlerts.length}</div><div class="hint">Vigilance et action confondues</div></div><div class="metric"><div class="label">Dernière valeur exploitable</div><div class="value" style="font-size:19px">${latest?esc(latest.id):'—'}</div><div class="hint">${latest?fmt(latest.x,3)+' · log10(CADN_H)':'Aucune mesure'}</div></div>`;
+ const wrap=$('dashboardCards');wrap.innerHTML=Object.keys(cardsMeta).map(id=>{const meta=cardsMeta[id],a=analyze(id),card=getCard(id),available=card.configured&&card.limits;const count=card.entries.length;const last=a.latest;const status=available?(a.overall==='neutral'?'neutral':a.overall):'pending';return `<article class="card card-tile"><div class="tile-top"><div><p class="tile-title">${esc(meta.title)}</p><p class="tile-desc">${esc(meta.subtitle)}</p></div><div class="tile-icon">${meta.icon}</div></div><div class="tile-meta"><span>${count} enregistrement(s)</span><span>•</span><span>${available?`${a.validCount} exploitable(s)`:'Référentiel indisponible'}</span></div><div class="tile-bottom">${statusHtml(status)}<button class="btn btn-small ${available?'btn-primary':''}" data-action="open-card" data-card="${id}">${available?'Consulter':'Voir le paramétrage'} →</button></div></article>`}).join('');
+}
+function renderTabs(containerId){$(containerId).innerHTML=Object.keys(cardsMeta).map(id=>`<button class="pill-btn ${activeCard===id?'active':''}" data-action="select-card" data-card="${id}">${esc(cardsMeta[id].short)}</button>`).join('');}
+function renderMonitor(){
+ renderTabs('cardTabs');const meta=cardsMeta[activeCard],card=getCard(activeCard),a=analyze(activeCard),target=$('monitorContent');
+ if(!card.configured||!card.limits){target.innerHTML=`<div class="card card-pad"><div class="page-head"><div><div class="eyebrow">Carte non encore paramétrée</div><h3>${esc(meta.title)}</h3><p class="subtitle">${esc(meta.subtitle)}</p></div>${statusHtml('pending')}</div><div class="notice info-note"><strong>En attente des limites :</strong> cette carte est créée dans l'application, mais aucun calcul de stabilité n'est activé. Dès que tu me transmettras les paramètres de référence, nous pourrons les intégrer sans modifier les autres cartes.</div><div class="grid grid-2"><div class="info-block"><h4>Variables prévues</h4><p>log10(CADN_H), étendues mobiles entre deux mesures successives, suivi des fractions dans leur série propre.</p></div><div class="info-block"><h4>Référentiel à compléter</h4><p>Ligne centrale I, limites d'alerte ±2σ, limites d'action ±3σ, ligne centrale MR et limite supérieure MR.</p></div></div><div class="form-actions"><button class="btn btn-primary" data-action="configure-card" data-card="${activeCard}">Saisir les limites de référence</button></div></div>`;return;}
+ const latest=a.latest;const status=a.overall==='neutral'?'neutral':a.overall;const warningCount=a.alerts.filter(x=>x.status==='warning').length;const actionCount=a.alerts.filter(x=>x.status==='action').length;
+ target.innerHTML=`
+ <div class="card card-pad" style="margin-bottom:16px"><div class="page-head" style="margin:0"><div><div class="eyebrow">${esc(meta.subtitle)}</div><h3>${esc(meta.title)}</h3><p class="subtitle">Les limites sont fixes. Chaque nouvelle mesure est ajoutée à la suite de l'ordre analytique, sans recalcul du référentiel.</p></div>${statusHtml(status)}</div>
+ <div class="metrics" style="margin-bottom:0"><div class="metric"><div class="label">Dernière valeur exploitable</div><div class="value" style="font-size:18px">${latest?esc(latest.id):'—'}</div><div class="hint">${latest?fmt(latest.x,3)+' · log10(CADN_H)':'Aucune mesure'}</div></div><div class="metric"><div class="label">MR de la dernière valeur</div><div class="value">${latest&&latest.mr!==null?fmt(latest.mr,3):'—'}</div><div class="hint">Différence logarithmique absolue</div></div><div class="metric"><div class="label">Alertes de vigilance</div><div class="value">${warningCount}</div><div class="hint">Sur l'ensemble de l'historique</div></div><div class="metric"><div class="label">Signaux d'action</div><div class="value">${actionCount}</div><div class="hint">I au-delà de ±3σ ou MR au-dessus UCL</div></div></div></div>
+ <div class="grid grid-2"><div class="card chart-card"><div class="chart-head"><div><h3>Carte I — Individus</h3><p>log10(CADN_H) · une valeur par run</p></div><span class="kbd">Limites fixes</span></div><div id="chartI" class="chart-wrap"></div><div class="legend"><span><i style="background:#0c8178"></i>Mesures</span><span><i style="background:#d49a36"></i>±2σ · alerte</span><span><i style="background:#c13d36"></i>±3σ · action</span><span><i style="background:#687b89"></i>CL</span></div></div>
+ <div class="card chart-card"><div class="chart-head"><div><h3>Carte MR — Étendues mobiles</h3><p>|Xᵢ − Xᵢ₋₁| · variabilité à court terme</p></div><span class="kbd">UCL MR</span></div><div id="chartMR" class="chart-wrap"></div><div class="legend"><span><i style="background:#2664a5"></i>MR</span><span><i style="background:#c13d36"></i>UCL MR</span><span><i style="background:#687b89"></i>CL MR</span></div></div></div>
+ <div class="section-title"><div><h3>Ajouter une mesure</h3><p>Le rang d'ajout correspond à l'ordre réel de la séquence analytique.</p></div></div>
+ <div class="card card-pad"><form id="addEntryForm"><div class="form-grid"><div class="field"><label for="entryId">N° de lyse / identifiant *</label><input id="entryId" name="id" placeholder="Ex. 26_0402" required></div><div class="field"><label for="entryDate">Date du run</label><input id="entryDate" name="date" type="date" value="${today()}"></div><div class="field"><label for="entryCadn">Concentration CADN_H (ng/µL)</label><input id="entryCadn" name="cadn" type="number" min="0" step="any" placeholder="Ex. 0,18"><small>0 ou vide : conservé, mais exclu du log et des cartes.</small></div>${activeCard==='lysis'?`<div class="field"><label for="entryModality">Modalité de charge</label><select id="entryModality" name="modality"><option value="Non renseignée">Non renseignée</option><option value="Chargée">Chargée</option><option value="Peu chargée">Peu chargée</option></select></div>`:''}</div><div class="field" style="margin-top:12px"><label for="entryNote">Commentaire / contexte (facultatif)</label><textarea id="entryNote" name="note" placeholder="Événement particulier, observation ou remarque…"></textarea></div><div class="form-actions"><button type="reset" class="btn">Effacer</button><button type="submit" class="btn btn-primary">Enregistrer la mesure</button></div></form></div>
+ <div class="section-title"><div><h3>Dernières mesures enregistrées</h3><p>Les résultats non renseignés restent dans l'historique et ne génèrent pas de point.</p></div><button class="btn btn-small" data-action="goto-history">Voir tout l'historique →</button></div><div class="table-wrap" id="recentEntriesTable"></div>
+ <div class="notice info-note"><strong>Traitement en routine :</strong> chaque nouvelle concentration positive est transformée en log10(CADN_H), puis comparée directement aux limites fixes. Le recentrage historique par zones n'est pas recalculé à chaque nouveau lot : c'est précisément l'intérêt du référentiel établi sur plusieurs années.</div><div class="notice"><strong>État synthétique :</strong> ${latest?`il correspond à la dernière mesure quantifiable (${esc(latest.id)}). Les alertes antérieures restent dans l'historique et ne disparaissent pas quand une mesure ultérieure revient dans les limites.`:'aucune mesure quantifiable ne permet actuellement de conclure.'}</div>`;
+ drawChart('chartI',a.points.map(p=>({label:p.id,value:p.x,status:p.iStatus})),[{key:'UCL',label:'UCL',value:card.limits.UCL,color:'#c13d36',dash:'0'},{key:'UWL',label:'UWL',value:card.limits.UWL,color:'#d49a36',dash:'5 4'},{key:'CL',label:'CL',value:card.limits.CL,color:'#687b89',dash:'0'},{key:'LWL',label:'LWL',value:card.limits.LWL,color:'#d49a36',dash:'5 4'},{key:'LCL',label:'LCL',value:card.limits.LCL,color:'#c13d36',dash:'0'}], 'log10(CADN_H)');
+ const mrPoints=a.points.filter(p=>p.mr!==null).map(p=>({label:p.id,value:p.mr,status:p.mrStatus}));
+ drawChart('chartMR',mrPoints,[{key:'UCLMR',label:'UCL MR',value:card.limits.UCLMR,color:'#c13d36',dash:'0'},{key:'CLMR',label:'CL MR',value:card.limits.CLMR,color:'#687b89',dash:'0'}],'MR');
+ renderRecentEntries();
+}
+function drawChart(targetId,points,lines,yLabel){
+ const el=$(targetId);if(!el)return;if(!points.length){el.innerHTML='<div class="empty">Aucune mesure positive exploitable pour cette carte.</div>';return;}
+ const W=900,H=300,L=64,R=22,T=18,B=52,plotW=W-L-R,plotH=H-T-B;
+ let min,max;if(yLabel==='MR'){min=0;max=Math.max(...points.map(p=>p.value),...lines.map(l=>l.value),0)*1.13;if(max===0)max=1;}else{min=Math.min(...points.map(p=>p.value),...lines.map(l=>l.value));max=Math.max(...points.map(p=>p.value),...lines.map(l=>l.value));let spread=max-min||1;min-=spread*.13;max+=spread*.13;}
+ const x=i=>L+(points.length===1?plotW/2:i*plotW/(points.length-1));const y=v=>T+(max-v)/(max-min)*plotH;
+ let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(yLabel)} au fil des mesures" xmlns="http://www.w3.org/2000/svg"><rect x="${L}" y="${T}" width="${plotW}" height="${plotH}" fill="#fbfcfd"/>`;
+ for(let i=0;i<=4;i++){const v=min+(max-min)*i/4,yy=y(v);s+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="#e7edf1"/><text x="${L-10}" y="${yy+4}" text-anchor="end" fill="#71808b" font-size="11">${fmt(v,2)}</text>`;}
+ lines.forEach(l=>{const yy=y(l.value);s+=`<line x1="${L}" y1="${yy}" x2="${W-R}" y2="${yy}" stroke="${l.color}" stroke-width="${l.key==='CL'||l.key==='CLMR'?1.5:2}" ${l.dash!=='0'?`stroke-dasharray="${l.dash}"`:''}/><text x="${W-R-3}" y="${Math.max(T+10,yy-5)}" text-anchor="end" fill="${l.color}" font-size="10" font-weight="700">${l.label}</text>`;});
+ if(points.length>1){const path=points.map((p,i)=>`${i?'L':'M'}${x(i)},${y(p.value)}`).join(' ');s+=`<path d="${path}" fill="none" stroke="#0c8178" stroke-width="1.8" opacity=".72" stroke-linejoin="round" stroke-linecap="round"/>`;}
+ points.forEach((p,i)=>{const c=p.status==='action'?'#b42318':p.status==='warning'?'#c18419':(yLabel==='MR'?'#2664a5':'#0c8178');s+=`<circle cx="${x(i)}" cy="${y(p.value)}" r="4.2" fill="${c}" stroke="#fff" stroke-width="1.5"><title>${esc(p.label)} : ${fmt(p.value,4)}${yLabel==='MR'?'':' · '+yLabel}</title></circle>`;});
+ const tickIdx=[...new Set([0,Math.floor((points.length-1)*.25),Math.floor((points.length-1)*.5),Math.floor((points.length-1)*.75),points.length-1])];tickIdx.forEach(i=>{s+=`<text x="${x(i)}" y="${H-23}" text-anchor="middle" fill="#71808b" font-size="10">${esc(points[i].label)}</text>`;});
+ s+=`<line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="#b8c5ce"/><text x="${(L+W-R)/2}" y="${H-5}" text-anchor="middle" fill="#71808b" font-size="10">Ordre des mesures</text><text x="13" y="${T+plotH/2}" transform="rotate(-90 13 ${T+plotH/2})" text-anchor="middle" fill="#71808b" font-size="10">${esc(yLabel)}</text></svg>`;el.innerHTML=s;
+}
+function renderRecentEntries(){const card=getCard(activeCard),rows=card.entries.slice(-8).reverse();const wrap=$('recentEntriesTable');if(!rows.length){wrap.innerHTML='<div class="empty">Aucune donnée enregistrée.</div>';return;}wrap.innerHTML=`<table><thead><tr><th>Ordre</th><th>Identifiant</th><th>Date</th><th>CADN_H</th><th>log10</th><th>MR</th><th>Statut</th><th>Actions</th></tr></thead><tbody>${rows.map(e=>{const p=analyze(activeCard).points.find(x=>x.uid===e.uid);const stat=e.cadn===null||e.cadn===''?'neutral':p?(p.iStatus==='action'||p.mrStatus==='action'?'action':p.iStatus==='warning'?'warning':'stable'):'neutral';return `<tr><td>${card.entries.indexOf(e)+1}</td><td><strong>${esc(e.id)}</strong></td><td>${fmtDate(e.date)}</td><td class="num">${e.cadn===null?'—':fmt(Number(e.cadn),4)}</td><td class="num">${p?fmt(p.x,4):'—'}</td><td class="num">${p&&p.mr!==null?fmt(p.mr,4):'—'}</td><td>${statusHtml(stat)}</td><td><div class="cell-actions"><button class="btn btn-small" data-action="edit-entry" data-uid="${esc(e.uid)}">Modifier</button></div></td></tr>`}).join('')}</tbody></table>`;}
+function renderHistory(){renderTabs('historyTabs');const a=analyze(activeCard),card=getCard(activeCard);$('historyMetrics').innerHTML=`<div class="metric"><div class="label">Enregistrements</div><div class="value">${a.rawCount}</div></div><div class="metric"><div class="label">Mesures positives</div><div class="value">${a.validCount}</div></div><div class="metric"><div class="label">Non évaluables</div><div class="value">${a.missingCount}</div></div><div class="metric"><div class="label">Signaux détectés</div><div class="value">${a.alerts.length}</div></div>`;
+ const alertWrap=$('alertTableWrap');if(!card.configured||!card.limits){alertWrap.innerHTML='<div class="empty">Les limites de cette carte ne sont pas encore renseignées : aucun signal ne peut être calculé.</div>';}else if(!a.alerts.length){alertWrap.innerHTML='<div class="empty">Aucun signal détecté avec les règles actuellement activées.</div>';}else{alertWrap.innerHTML=`<table><thead><tr><th>Identifiant</th><th>Signal</th><th>Valeur</th><th>Interprétation</th><th>Commentaire</th><th>Action</th></tr></thead><tbody>${a.alerts.slice().reverse().map(al=>`<tr><td><strong>${esc(al.id)}</strong></td><td>${statusHtml(al.status)} <span class="kbd">${al.kind}</span></td><td class="num">${fmt(al.value,4)}</td><td>${esc(al.detail)}</td><td style="white-space:normal;min-width:170px">${esc(al.note||'—')}</td><td><button class="btn btn-small" data-action="edit-entry" data-uid="${esc(al.uid)}">Documenter</button></td></tr>`).join('')}</tbody></table>`;}
+ const audit=(state.audit||[]).filter(x=>!x.cardId||x.cardId===activeCard).slice(0,100);const auditWrap=$('auditLogTable');auditWrap.innerHTML=audit.length?`<table><thead><tr><th>Date / heure</th><th>Opération</th><th>Détail</th></tr></thead><tbody>${audit.map(x=>`<tr><td>${esc(new Date(x.at).toLocaleString('fr-FR'))}</td><td>${esc(x.action||'—')}</td><td style="white-space:normal;min-width:240px">${esc(x.detail||'—')}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">Aucune opération enregistrée pour cette carte.</div>';
+ const dataWrap=$('allDataTableWrap');if(!card.entries.length){dataWrap.innerHTML='<div class="empty">Aucun enregistrement.</div>';return;}const points=a.points;dataWrap.innerHTML=`<table><thead><tr><th>Ordre</th><th>Identifiant</th><th>Date</th>${activeCard==='lysis'?'<th>Modalité</th>':''}<th>CADN_H</th><th>log10</th><th>MR</th><th>Statut I</th><th>Commentaire</th><th>Actions</th></tr></thead><tbody>${card.entries.map((e,i)=>{const p=points.find(x=>x.uid===e.uid);const stat=e.cadn===null||e.cadn===''?'neutral':p?(p.iStatus==='action'||p.mrStatus==='action'?'action':p.iStatus==='warning'?'warning':'stable'):'neutral';return `<tr><td>${i+1}</td><td><strong>${esc(e.id)}</strong></td><td>${fmtDate(e.date)}</td>${activeCard==='lysis'?`<td>${esc(e.modality||'Non renseignée')}</td>`:''}<td class="num">${e.cadn===null?'—':fmt(Number(e.cadn),4)}</td><td class="num">${p?fmt(p.x,4):'—'}</td><td class="num">${p&&p.mr!==null?fmt(p.mr,4):'—'}</td><td>${statusHtml(stat)}</td><td style="white-space:normal;min-width:140px">${esc(e.note||'—')}</td><td><div class="cell-actions"><button class="btn btn-small" data-action="edit-entry" data-uid="${esc(e.uid)}">Modifier</button><button class="btn btn-small btn-danger" data-action="delete-entry" data-uid="${esc(e.uid)}">Supprimer</button></div></td></tr>`}).join('')}</tbody></table>`;
+}
+function renderSettings(){const wrap=$('settingsCards');wrap.innerHTML=Object.keys(cardsMeta).map(id=>{const meta=cardsMeta[id],c=getCard(id);if(!c.configured||!c.limits)return `<article class="card card-pad"><div class="tile-top"><div><h3>${esc(meta.short)}</h3><p class="subtitle" style="font-size:11px">${esc(meta.subtitle)}</p></div>${statusHtml('pending')}</div><p class="subtitle" style="font-size:12px;margin:13px 0">Les paramètres de référence sont enregistrés et protégés contre les modifications accidentelles.</p><button class="btn btn-primary" data-action="configure-card" data-card="${id}">Renseigner les limites</button></article>`;return `<article class="card card-pad"><div class="tile-top"><div><h3>${esc(meta.short)}</h3><p class="subtitle" style="font-size:11px">${esc(meta.source)}</p></div>${statusHtml('stable')}</div><div style="margin-top:12px">${[['CL I',c.limits.CL],['LWL I',c.limits.LWL],['UWL I',c.limits.UWL],['LCL I',c.limits.LCL],['UCL I',c.limits.UCL],['CL MR',c.limits.CLMR],['UCL MR',c.limits.UCLMR]].map(x=>`<div class="mini-stat"><span>${x[0]}</span><strong>${fmt(x[1],4)}</strong></div>`).join('')}</div><p class="subtitle" style="font-size:10px;margin-top:10px">Référentiel : ${esc(meta.source)}. Les limites sont conservées comme paramètres de référence ; toute modification doit être volontaire et documentée.</p></article>`}).join('');}
+function openDialog(title,eyebrow,html){$('dialogTitle').textContent=title;$('dialogEyebrow').textContent=eyebrow;$('dialogBody').innerHTML=html;$('dialogBackdrop').classList.add('open');setTimeout(()=>{const f=$('dialogBody').querySelector('input,select,textarea');if(f)f.focus();},20);}
+function closeDialog(){$('dialogBackdrop').classList.remove('open');$('dialogBody').innerHTML='';editUid=null;}
+function renderImportPage(){
+ const sel=$('importCard');if(sel)sel.value=state.selectedCard||'lysis';
+}
+function parseDelimitedText(text){
+ text=String(text||'').replace(/^\uFEFF/,'');const sample=text.split(/\r?\n/).slice(0,8).join('\n');
+ const candidates=[';','\t',','];let delimiter=';';let best=-1;
+ for(const d of candidates){let count=0,quoted=false;for(let i=0;i<sample.length;i++){const ch=sample[i];if(ch==='"'){if(quoted&&sample[i+1]==='"'){i++;continue;}quoted=!quoted;}else if(ch===d&&!quoted)count++;}if(count>best){best=count;delimiter=d;}}
+ const rows=[];let row=[],field='',quoted=false;
+ for(let i=0;i<text.length;i++){const ch=text[i];
+  if(ch==='"'){if(quoted&&text[i+1]==='"'){field+='"';i++;}else quoted=!quoted;}
+  else if(ch===delimiter&&!quoted){row.push(field);field='';}
+  else if((ch==='\n'||ch==='\r')&&!quoted){if(ch==='\r'&&text[i+1]==='\n')i++;row.push(field);field='';if(row.some(v=>String(v).trim()!==''))rows.push(row);row=[];}
+  else field+=ch;
+ }
+ if(field!==''||row.length){row.push(field);if(row.some(v=>String(v).trim()!==''))rows.push(row);}
+ return rows;
+}
+function zipPathNormalize(base,target){
+ if(target.startsWith('/'))return target.replace(/^\/+/, '');
+ const parts=base.split('/');parts.pop();for(const part of target.split('/')){if(!part||part==='.')continue;if(part==='..')parts.pop();else parts.push(part);}return parts.join('/');
+}
+async function unzipXlsx(file){
+ const bytes=new Uint8Array(await file.arrayBuffer()),view=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);let eocd=-1;
+ for(let i=bytes.length-22;i>=Math.max(0,bytes.length-65557);i--){if(view.getUint32(i,true)===0x06054b50){eocd=i;break;}}
+ if(eocd<0)throw new Error('Archive XLSX non reconnu (répertoire ZIP absent).');
+ const entries=view.getUint16(eocd+10,true),cdOffset=view.getUint32(eocd+16,true);let pos=cdOffset;const files=new Map();
+ for(let n=0;n<entries;n++){
+  if(view.getUint32(pos,true)!==0x02014b50)throw new Error('Structure ZIP XLSX illisible.');
+  const method=view.getUint16(pos+10,true),compressedSize=view.getUint32(pos+20,true),nameLen=view.getUint16(pos+28,true),extraLen=view.getUint16(pos+30,true),commentLen=view.getUint16(pos+32,true),localOffset=view.getUint32(pos+42,true);
+  const name=new TextDecoder().decode(bytes.slice(pos+46,pos+46+nameLen));files.set(name,{method,compressedSize,localOffset});pos+=46+nameLen+extraLen+commentLen;
+ }
+ async function read(name){const entry=files.get(name);if(!entry) return null;const o=entry.localOffset;if(view.getUint32(o,true)!==0x04034b50)throw new Error('Entrée ZIP XLSX invalide : '+name);const nl=view.getUint16(o+26,true),el=view.getUint16(o+28,true),start=o+30+nl+el,compressed=bytes.slice(start,start+entry.compressedSize);if(entry.method===0)return new TextDecoder().decode(compressed);if(entry.method!==8)throw new Error('Compression XLSX non prise en charge : '+entry.method);if(typeof DecompressionStream==='undefined')throw new Error('Ce navigateur ne permet pas de décompresser les fichiers XLSX. Essaie avec Chrome ou Edge récent.');const stream=new Blob([compressed]).stream().pipeThrough(new DecompressionStream('deflate-raw'));return new TextDecoder().decode(await new Response(stream).arrayBuffer());}
+ const parseXml=(txt)=>new DOMParser().parseFromString(txt,'application/xml');
+ const wbText=await read('xl/workbook.xml');if(!wbText)throw new Error('Le fichier ne contient pas de classeur Excel lisible.');const wb=parseXml(wbText);const relText=await read('xl/_rels/workbook.xml.rels');const relDoc=parseXml(relText||'<Relationships/>');const rels={};Array.from(relDoc.getElementsByTagName('Relationship')).forEach(r=>rels[r.getAttribute('Id')]=zipPathNormalize('xl/workbook.xml',r.getAttribute('Target')));
+ const ssText=await read('xl/sharedStrings.xml'),shared=[];if(ssText){const ss=parseXml(ssText);Array.from(ss.getElementsByTagName('si')).forEach(si=>shared.push(Array.from(si.getElementsByTagName('t')).map(t=>t.textContent).join('')));}
+ const sheets=[];for(const sh of Array.from(wb.getElementsByTagName('sheet'))){const name=sh.getAttribute('name')||'Feuille';const rid=sh.getAttribute('r:id')||sh.getAttribute('id');const path=rels[rid];if(!path)continue;const xml=await read(path);if(!xml)continue;const doc=parseXml(xml);const rows=[];for(const rowEl of Array.from(doc.getElementsByTagName('row'))){const row=[];for(const c of Array.from(rowEl.getElementsByTagName('c'))){const ref=c.getAttribute('r')||'A1',letters=(ref.match(/[A-Z]+/i)||['A'])[0].toUpperCase();let col=0;for(const ch of letters)col=col*26+ch.charCodeAt(0)-64;col--;const type=c.getAttribute('t'),vEl=c.getElementsByTagName('v')[0];let value='';if(type==='inlineStr'){value=Array.from(c.getElementsByTagName('t')).map(t=>t.textContent).join('');}else if(vEl){const raw=vEl.textContent;if(type==='s')value=shared[Number(raw)]??'';else if(type==='b')value=raw==='1';else if(type==='str')value=raw;else {const num=Number(raw);value=raw!==''&&Number.isFinite(num)?num:raw;}}row[col]=value;}
+   rows.push(row.map(v=>v===undefined?'':v));}
+  sheets.push({name,rows});}
+ if(!sheets.length)throw new Error('Aucune feuille de calcul exploitable trouvée.');return sheets;
+}
+function normHeader(v){return String(v??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+function guessColumn(headers,kind){
+ const aliases={
+  id:['cbech','identifiant','numerodelyse','nodelyse','numlyse','sampleid','echantillon','id'],
+  date:['dateextrac','dateextraction','dateanalyse','datedurun','daterun','date'],
+  cadn:['adnh','cadnh','concentrationadn','concentrationngul','concentration','cadn','ngul','ngl'],
+  modality:['modalite','modalitedecharge','typecharge','charge']
+ };
+ const norm=headers.map(normHeader), exact=norm.findIndex(h=>aliases[kind].includes(h));
+ if(exact>=0)return exact;
+ const excluded=['ordre','chrono','log','mr','ratio','moyenne','ecart','sigma','ucl','lcl','limite','corrige','corrigee'];
+ return norm.findIndex(h=>!excluded.some(x=>h.includes(x))&&aliases[kind].some(a=>a.length>4&&h.startsWith(a)));
+}
+function selectedImportSheet(){return importDraft?.sheets[Number(importDraft.sheetIndex)||0];}
+function buildImportConfig(){
+ const box=$('importConfig');if(!importDraft){box.classList.add('hidden');return;}box.classList.remove('hidden');const sh=selectedImportSheet();const hasHeader=importDraft.hasHeader!==false;const first=sh.rows[0]||[];const width=Math.max(1,...sh.rows.map(r=>r.length));const headers=Array.from({length:width},(_,i)=>hasHeader?String(first[i]??'').trim()||`Colonne ${i+1}`:`Colonne ${i+1}`);const start=hasHeader?1:0;
+ const auto=(kind)=>{const n=guessColumn(headers,kind);if(n>=0)return n;return kind==='id'?0:kind==='cadn'?Math.min(1,width-1):-1;};
+ const map=importDraft.mapping||{};const opts=(value,allowNone)=>`${allowNone?'<option value="-1">Non importée</option>':''}`+headers.map((h,i)=>`<option value="${i}" ${Number(value)===i?'selected':''}>${esc(String.fromCharCode(65+i))} — ${esc(h)}</option>`).join('');
+ const sheetSelect=importDraft.sheets.length>1?`<div class="field"><label for="importSheet">Feuille du classeur</label><select id="importSheet">${importDraft.sheets.map((x,i)=>`<option value="${i}" ${i===Number(importDraft.sheetIndex||0)?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div>`:'';
+ box.innerHTML=`<div class="import-step"><div class="page-head" style="margin:0 0 12px"><div><h3>Préparer l'import</h3><p class="subtitle">Fichier : ${esc(importDraft.fileName)} · ${sh.rows.length} lignes brutes</p></div><button class="btn btn-small" id="clearImportBtn" type="button">Choisir un autre fichier</button></div>
+ <div class="form-grid">${sheetSelect}<div class="field"><label><input type="checkbox" id="importHasHeader" ${hasHeader?'checked':''} style="width:auto;margin-right:6px">La première ligne contient les noms de colonnes</label><small>Décoche cette option si la première ligne contient déjà une mesure.</small></div><div class="field"><label for="mapId">Colonne Identifiant *</label><select id="mapId">${opts(map.id??auto('id'),false)}</select></div><div class="field"><label for="mapCadn">Colonne CADN_H *</label><select id="mapCadn">${opts(map.cadn??auto('cadn'),false)}</select></div><div class="field"><label for="mapDate">Colonne Date</label><select id="mapDate">${opts(map.date??auto('date'),true)}</select><small>Formats reconnus : JJ/MM/AAAA, JJ-MM-AAAA, JJ.MM.AAAA, AAAA-MM-JJ et dates Excel. Une date renseignée mais invalide entraîne le rejet de la ligne.</small></div><div class="field"><label for="mapModality">Colonne Modalité de charge (si présente)</label><select id="mapModality">${opts(map.modality??auto('modality'),true)}</select></div></div>
+ <div id="importPreview"></div><div class="form-actions"><button class="btn" id="refreshImportPreview" type="button">Actualiser l'aperçu</button><button class="btn btn-primary" id="commitImportBtn" type="button">Importer les données</button></div></div>`;
+ refreshImportPreview();
+}
+function excelSerialToDate(n){if(!Number.isFinite(Number(n))||Number(n)<1)return null;const d=new Date(Date.UTC(1899,11,30)+Math.floor(Number(n))*86400000);return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;}
+function parseDateImport(v){
+ if(v===null||v===undefined||String(v).trim()==='')return {date:null,invalid:false,format:'vide'};
+ if(typeof v==='number'){const date=excelSerialToDate(v);return {date,invalid:!date,format:'date Excel'};}
+ const s=String(v).trim();let m=s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})$/);
+ if(m){const day=Number(m[1]),month=Number(m[2]),year=Number(m[3]);const d=new Date(Date.UTC(year,month-1,day));const valid=d.getUTCFullYear()===year&&d.getUTCMonth()===month-1&&d.getUTCDate()===day;return {date:valid?`${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`:null,invalid:!valid,format:'JJ/MM/AAAA'};}
+ m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+ if(m){const year=Number(m[1]),month=Number(m[2]),day=Number(m[3]);const d=new Date(Date.UTC(year,month-1,day));const valid=d.getUTCFullYear()===year&&d.getUTCMonth()===month-1&&d.getUTCDate()===day;return {date:valid?`${m[1]}-${m[2]}-${m[3]}`:null,invalid:!valid,format:'AAAA-MM-JJ'};}
+ return {date:null,invalid:true,format:'inconnu'};
+}
+function parseCadnImport(v){if(v===null||v===undefined||String(v).trim()===''||['nd','n/a','na','-','non quantifie','non quantifié'].includes(String(v).trim().toLowerCase()))return {value:null,blank:true,invalid:false};let s=String(v).trim().replace(/[\s\u00a0]/g,'').replace(',','.');const n=Number(s);if(!Number.isFinite(n)||n<0)return {value:null,blank:false,invalid:true};return {value:n,blank:false,invalid:false};}
+function getImportRows(){if(!importDraft)return {rows:[],issues:[],empty:0};const sh=selectedImportSheet(),hasHeader=$('importHasHeader')?.checked??true,start=hasHeader?1:0,idCol=Number($('mapId')?.value??0),cadnCol=Number($('mapCadn')?.value??1),dateCol=Number($('mapDate')?.value??-1),modCol=Number($('mapModality')?.value??-1);const rows=[],issues=[],warnings=[];let empty=0;
+ sh.rows.slice(start).forEach((r,i)=>{if(!r||r.every(v=>String(v??'').trim()==='')){empty++;return;}const id=String(r[idCol]??'').trim();if(!id){issues.push({line:i+start+1,reason:'Identifiant manquant'});return;}const cadn=parseCadnImport(r[cadnCol]);if(cadn.invalid){issues.push({line:i+start+1,reason:'Concentration non numérique ou négative'});return;}const dateRaw=dateCol>=0?r[dateCol]:null,date=parseDateImport(dateRaw);if(date.invalid){issues.push({line:i+start+1,reason:'Date invalide ou format non reconnu (attendu : JJ/MM/AAAA ou AAAA-MM-JJ)'});return;}
+ let modality='Non renseignée';if(modCol>=0){const m=String(r[modCol]??'').trim().toLowerCase();if(m.includes('peu'))modality='Peu chargée';else if(m.includes('charg'))modality='Chargée';else if(m)modality=String(r[modCol]).trim();}
+ rows.push({id,date:date.date,cadn:cadn.value,modality,sourceLine:i+start+1,cadnBlank:cadn.blank,dateInvalid:date.invalid});});return {rows,issues,warnings,empty};}
+function refreshImportPreview(){const target=$('importPreview');if(!target||!importDraft)return;const data=getImportRows(),mode=$('importMode').value,cardId=$('importCard').value,existing=mode==='append'?getCard(cardId).entries:[];const ids=new Set(existing.map(e=>String(e.id).toLowerCase()));let newCount=0,dupes=0;data.rows.forEach(r=>{const k=r.id.toLowerCase();if(ids.has(k))dupes++;else{ids.add(k);newCount++;}});const preview=data.rows.slice(0,10);target.innerHTML=`<div class="import-summary"><div class="metric"><div class="label">Lignes importables</div><div class="value">${data.rows.length}</div></div><div class="metric"><div class="label">Nouveaux identifiants estimés</div><div class="value">${newCount}</div></div><div class="metric"><div class="label">Doublons estimés</div><div class="value">${dupes}</div></div><div class="metric"><div class="label">Lignes rejetées</div><div class="value">${data.issues.length}</div></div></div><p class="subtitle" style="font-size:11px;margin:12px 0 6px">Aperçu des ${preview.length} premières lignes exploitables (sur ${data.rows.length}).</p><div class="import-preview">${preview.length?`<table><thead><tr><th>Ligne</th><th>Identifiant</th><th>Date</th><th>CADN_H</th><th>Modalité</th></tr></thead><tbody>${preview.map(r=>`<tr><td>${r.sourceLine}</td><td>${esc(r.id)}</td><td>${esc(r.date||'—')}</td><td class="num">${r.cadn===null?'—':fmt(r.cadn,5)}</td><td>${esc(r.modality)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">Aucune ligne exploitable avec les correspondances actuelles.</div>'}</div>${data.issues.length?`<p class="subtitle" style="font-size:11px;color:var(--amber)">Lignes rejetées : ${data.issues.slice(0,5).map(x=>`ligne ${x.line} (${esc(x.reason)})`).join(' · ')}${data.issues.length>5?' · …':''}</p>`:''}${data.warnings?.length?`<p class="subtitle" style="font-size:11px;color:var(--amber)">Attention sur les dates : ${data.warnings.slice(0,5).map(x=>`ligne ${x.line} (${esc(x.reason)})`).join(' · ')}${data.warnings.length>5?' · …':''}</p>`:''}`;
+}
+async function handleDataFile(file){try{toast('Lecture du fichier…');let sheets;if(/\.xlsx$/i.test(file.name)){sheets=await unzipXlsx(file);}else{const text=await file.text();const rows=parseDelimitedText(text);if(!rows.length)throw new Error('Le fichier CSV est vide ou illisible.');sheets=[{name:'Données CSV',rows}];}const dataSheet=sheets.findIndex(sh=>{const hs=(sh.rows[0]||[]).map(normHeader);return hs.includes('cbech')&&hs.some(h=>h==='adnh'||h==='cadnh')&&hs.some(h=>h.startsWith('date'));});importDraft={fileName:file.name,sheets,sheetIndex:dataSheet>=0?dataSheet:0,hasHeader:true,mapping:null};buildImportConfig();toast('Fichier chargé. Vérifie les colonnes et l’aperçu avant validation.');}catch(e){importDraft=null;$('importConfig').classList.add('hidden');$('importMessage').textContent='Erreur de lecture : '+e.message;toast('Import impossible : '+e.message);}}
+function commitDataImport(){if(!importDraft)return;const cardId=$('importCard').value,mode=$('importMode').value,order=$('importOrder').value,meta=cardsMeta[cardId];const parsed=getImportRows();if(!parsed.rows.length){toast('Aucune ligne valide à importer.');return;}const c=getCard(cardId);if(mode==='replace'&&!confirm(`Remplacer les ${c.entries.length} enregistrement(s) actuels de « ${meta.short} » par les données de ${importDraft.fileName} ? Les autres cartes et les limites resteront inchangées.`))return;
+ const base=mode==='replace'?[]:c.entries.slice();const ids=new Set(base.map(e=>String(e.id).toLowerCase()));const accepted=[];let duplicateCount=0,missingDates=0;
+ for(const r of parsed.rows){const key=r.id.toLowerCase();if(ids.has(key)){duplicateCount++;continue;}ids.add(key);if(!r.date)missingDates++;accepted.push({uid:'imp-'+Date.now()+'-'+Math.random().toString(36).slice(2,9),id:r.id,date:r.date,cadn:r.cadn,modality:cardId==='lysis'?r.modality:'Non renseignée',note:'',createdAt:new Date().toISOString(),updatedAt:null,origin:`Import ${importDraft.fileName}`,sourceFile:importDraft.fileName,sourceLine:r.sourceLine});}
+ if(!accepted.length){toast('Aucune nouvelle ligne à ajouter : tous les identifiants sont déjà présents ou les lignes sont invalides.');return;}
+ let combined=base.concat(accepted);if(order==='date'){if(combined.some(e=>!e.date)){toast('Tri impossible : toutes les mesures de la série finale doivent posséder une date valide. Choisis « Conserver l’ordre du fichier » ou complète les dates.');return;}combined=combined.map((e,i)=>({...e,_sort:i})).sort((a,b)=>a.date.localeCompare(b.date)||a._sort-b._sort).map(({_sort,...e})=>e);}
+ c.entries=combined;activeCard=cardId;state.selectedCard=cardId;logAudit(cardId,'Import de données',`${accepted.length} mesure(s) ajoutée(s) depuis ${importDraft.fileName} ; ${duplicateCount} doublon(s) ignoré(s), ${parsed.issues.length} ligne(s) rejetée(s), ${parsed.warnings?.length||0} date(s) à vérifier, ${accepted.filter(e=>e.cadn===null).length} concentration(s) vide(s). Mode : ${mode==='replace'?'remplacement':'ajout'} ; ordre : ${order==='date'?'tri par date':'ordre du fichier'}.`);save();const summary=`Import terminé : ${accepted.length} ligne(s) ajoutée(s), ${duplicateCount} doublon(s) ignoré(s), ${parsed.issues.length} ligne(s) rejetée(s), ${parsed.warnings?.length||0} date(s) à vérifier.`;importDraft=null;$('importConfig').classList.add('hidden');$('dataImportFile').value='';$('importMessage').textContent=summary+' Les limites de référence n’ont pas été modifiées.';toast(summary);renderDashboard();}
+
+function configureCard(id){const meta=cardsMeta[id];const c=getCard(id);const vals=c.limits||{CL:'',LWL:'',UWL:'',LCL:'',UCL:'',CLMR:'',UCLMR:''};openDialog('Configurer les limites — '+meta.short,'Référentiel statistique',`<div class="notice info-note">Renseigne uniquement les paramètres issus de l'étude validée. L'application ne les estimera pas automatiquement à partir des mesures de routine.</div><form id="limitsForm" data-card="${id}"><div class="form-grid">${[['CL','Ligne centrale I'],['LWL','Alerte basse I (−2σ)'],['UWL','Alerte haute I (+2σ)'],['LCL','Action basse I (−3σ)'],['UCL','Action haute I (+3σ)'],['CLMR','Ligne centrale MR'],['UCLMR','Action haute MR']].map(([k,l])=>`<div class="field"><label for="lim-${k}">${l}</label><input id="lim-${k}" name="${k}" type="number" step="any" required value="${esc(vals[k]??'')}"></div>`).join('')}</div><p class="subtitle" style="font-size:11px">Contrôle de cohérence requis : LCL < LWL < CL < UWL < UCL et UCL MR supérieure ou égale à CL MR.</p><div class="modal-foot"><button type="button" class="btn" data-action="close-dialog">Annuler</button><button type="submit" class="btn btn-primary">Enregistrer le référentiel</button></div></form>`);}
+function editEntry(uid){const c=getCard(activeCard),e=c.entries.find(x=>x.uid===uid);if(!e)return;editUid=uid;openDialog('Modifier une mesure','Traçabilité',`<form id="editEntryForm" data-uid="${esc(uid)}"><div class="form-grid"><div class="field"><label for="editId">Identifiant *</label><input id="editId" name="id" required value="${esc(e.id)}"></div><div class="field"><label for="editDate">Date du run</label><input id="editDate" name="date" type="date" value="${esc(e.date||'')}"></div><div class="field"><label for="editCadn">CADN_H (ng/µL)</label><input id="editCadn" name="cadn" type="number" min="0" step="any" value="${e.cadn===null?'':esc(e.cadn)}"></div>${activeCard==='lysis'?`<div class="field"><label for="editModality">Modalité</label><select id="editModality" name="modality">${['Non renseignée','Chargée','Peu chargée'].map(v=>`<option ${e.modality===v?'selected':''}>${v}</option>`).join('')}</select></div>`:''}</div><div class="field" style="margin-top:12px"><label for="editNote">Commentaire / investigation</label><textarea id="editNote" name="note">${esc(e.note||'')}</textarea></div><div class="modal-foot"><button type="button" class="btn" data-action="close-dialog">Annuler</button><button type="submit" class="btn btn-primary">Enregistrer les modifications</button></div></form>`);}
+function deleteEntry(uid){const c=getCard(activeCard),idx=c.entries.findIndex(e=>e.uid===uid);if(idx<0)return;const e=c.entries[idx];if(!confirm(`Supprimer l'enregistrement ${e.id} ? Cette action sera enregistrée dans le journal local.`))return;c.entries.splice(idx,1);logAudit(activeCard,'Suppression',`Enregistrement ${e.id} supprimé.`);save();renderPage();toast('Enregistrement supprimé.');}
+function exportJson(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});downloadBlob(blob,`statqualite-imr-sauvegarde-${today()}.json`);toast('Sauvegarde JSON préparée.');}
+function downloadBlob(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function exportCsv(){const a=analyze(activeCard),card=getCard(activeCard);const pmap=new Map(a.points.map(p=>[p.uid,p]));const rows=[['Ordre','Identifiant','Date','Modalité','CADN_H_ng_uL','log10_CADN_H','MR_log10','Statut_I','Statut_MR','Commentaire']];card.entries.forEach((e,i)=>{const p=pmap.get(e.uid);rows.push([i+1,e.id,e.date||'',e.modality||'',e.cadn??'',p?p.x:'',p&&p.mr!==null?p.mr:'',p?p.iStatus:'non_evaluable',p?p.mrStatus:'non_evaluable',e.note||'']);});const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),`statqualite-${activeCard}-${today()}.csv`);toast('Export CSV préparé.');}
+function importJsonFile(file){const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);if(!data||!data.cards||!data.cards.lysis||!data.cards.f1||!data.cards.f2)throw new Error('Structure de sauvegarde non reconnue.');if(!confirm('Restaurer cette sauvegarde remplacera les données actuellement présentes dans ce navigateur. Continuer ?'))return;state=data;activeCard=state.selectedCard||'lysis';save();switchPage('dashboard');toast('Sauvegarde restaurée.');}catch(e){alert('Impossible de restaurer ce fichier : '+e.message);}};reader.readAsText(file);}
+function submitAdd(form){const fd=new FormData(form),id=String(fd.get('id')||'').trim(),date=String(fd.get('date')||''),raw=String(fd.get('cadn')??'').trim().replace(',','.');if(!id){toast('L’identifiant est obligatoire.');return;}const c=getCard(activeCard);if(c.entries.some(e=>e.id.toLowerCase()===id.toLowerCase())){toast('Cet identifiant existe déjà dans cette carte.');return;}let cadn=null;if(raw!==''){cadn=Number(raw);if(!Number.isFinite(cadn)||cadn<0){toast('La concentration doit être un nombre positif ou nul.');return;}}const e={uid:'m-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),id,date:date||null,cadn,modality:String(fd.get('modality')||'Non renseignée'),note:String(fd.get('note')||'').trim(),createdAt:new Date().toISOString(),updatedAt:null,origin:'Saisie application'};c.entries.push(e);logAudit(activeCard,'Ajout',`Mesure ${id} ajoutée${cadn===null?' sans résultat':cadn===0?' avec CADN_H nul':'.'}`);save();renderMonitor();toast(cadn===null||cadn===0?'Enregistrement conservé, non intégré aux cartes.':'Mesure ajoutée et cartes actualisées.');}
+function submitEdit(form){const uid=form.dataset.uid,c=getCard(activeCard),e=c.entries.find(x=>x.uid===uid);if(!e)return;const fd=new FormData(form),id=String(fd.get('id')||'').trim(),date=String(fd.get('date')||''),raw=String(fd.get('cadn')??'').trim().replace(',','.');if(!id){toast('L’identifiant est obligatoire.');return;}if(c.entries.some(x=>x.uid!==uid&&x.id.toLowerCase()===id.toLowerCase())){toast('Cet identifiant existe déjà dans cette carte.');return;}let cadn=null;if(raw!==''){cadn=Number(raw);if(!Number.isFinite(cadn)||cadn<0){toast('La concentration doit être un nombre positif ou nul.');return;}}const old=e.id;e.id=id;e.date=date||null;e.cadn=cadn;if(activeCard==='lysis')e.modality=String(fd.get('modality')||'Non renseignée');e.note=String(fd.get('note')||'').trim();e.updatedAt=new Date().toISOString();logAudit(activeCard,'Modification',`Enregistrement ${old} modifié.`);save();closeDialog();renderPage();toast('Modifications enregistrées.');}
+function submitLimits(form){const fd=new FormData(form),v={};for(const k of ['CL','LWL','UWL','LCL','UCL','CLMR','UCLMR']){v[k]=Number(fd.get(k));if(!Number.isFinite(v[k])){toast('Tous les paramètres doivent être numériques.');return;}}if(!(v.LCL<v.LWL&&v.LWL<v.CL&&v.CL<v.UWL&&v.UWL<v.UCL)){toast('Ordre incohérent : il faut LCL < LWL < CL < UWL < UCL.');return;}if(!(v.CLMR>=0&&v.UCLMR>=v.CLMR)){toast('Vérifie les paramètres de la carte MR.');return;}const id=form.dataset.card;state.cards[id].limits=v;state.cards[id].configured=true;logAudit(id,'Configuration des limites','Référentiel statistique renseigné manuellement.');save();closeDialog();renderPage();toast('Limites enregistrées. La carte est maintenant activée.');}
+
+document.addEventListener('click',e=>{
+ const nav=e.target.closest('[data-page]');if(nav){switchPage(nav.dataset.page);return;}
+ const go=e.target.closest('[data-go]');if(go){goFromButton(go);return;}
+ const act=e.target.closest('[data-action]');if(!act)return;
+ const a=act.dataset.action;
+ if(a==='open-card'||a==='select-card'){activeCard=act.dataset.card;state.selectedCard=activeCard;save();switchPage('monitor');}
+ else if(a==='configure-card')configureCard(act.dataset.card);
+ else if(a==='edit-entry')editEntry(act.dataset.uid);
+ else if(a==='delete-entry')deleteEntry(act.dataset.uid);
+ else if(a==='close-dialog')closeDialog();
+ else if(a==='goto-history')switchPage('history');
+});
+document.addEventListener('submit',e=>{if(e.target.id==='addEntryForm'){e.preventDefault();submitAdd(e.target);}else if(e.target.id==='editEntryForm'){e.preventDefault();submitEdit(e.target);}else if(e.target.id==='limitsForm'){e.preventDefault();submitLimits(e.target);}});
+$('dialogClose').addEventListener('click',closeDialog);$('dialogBackdrop').addEventListener('click',e=>{if(e.target===$('dialogBackdrop'))closeDialog();});
+
+// Génération locale d'un modèle XLSX minimal (sans bibliothèque externe).
+function crc32(bytes){let c=0xffffffff;for(const b of bytes){c^=b;for(let k=0;k<8;k++)c=(c>>>1)^((c&1)?0xedb88320:0);}return (c^0xffffffff)>>>0;}
+function makeStoredZip(files){const enc=new TextEncoder(),parts=[],central=[];let offset=0;const u16=n=>[n&255,(n>>>8)&255],u32=n=>[n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255];
+ for(const [name,content] of Object.entries(files)){const nb=enc.encode(name),data=enc.encode(content),crc=crc32(data);const local=new Uint8Array([...u32(0x04034b50),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(data.length),...u32(data.length),...u16(nb.length),...u16(0),...nb,...data]);parts.push(local);const cen=new Uint8Array([...u32(0x02014b50),...u16(20),...u16(20),...u16(0),...u16(0),...u16(0),...u16(0),...u32(crc),...u32(data.length),...u32(data.length),...u16(nb.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(offset),...nb]);central.push(cen);offset+=local.length;}
+ const csize=central.reduce((a,b)=>a+b.length,0),end=new Uint8Array([...u32(0x06054b50),...u16(0),...u16(0),...u16(central.length),...u16(central.length),...u32(csize),...u32(offset),...u16(0)]);return new Blob([...parts,...central,end],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});}
+function downloadImportTemplate(){const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');const sheets=['Témoins de lyse','F1 spermatique','F2 épithéliale'];const files={};
+ files['[Content_Types].xml']='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')+'</Types>';
+ files['_rels/.rels']='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>';
+ files['xl/workbook.xml']='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>'+sheets.map((n,i)=>`<sheet name="${esc(n)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')+'</sheets></workbook>';
+ files['xl/_rels/workbook.xml.rels']='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+sheets.map((_,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')+'</Relationships>';
+ sheets.forEach((_,i)=>{const headers=['CB_ECH','DATEEXTRAC','ADN_H','MODALITE'];const cols=['A','B','C','D'];const cells=headers.map((h,j)=>`<c r="${cols[j]}1" t="inlineStr"><is><t>${h}</t></is></c>`).join('');files[`xl/worksheets/sheet${i+1}.xml`]=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:D2"/><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="18"/><cols><col min="1" max="1" width="18" customWidth="1"/><col min="2" max="2" width="16" customWidth="1"/><col min="3" max="3" width="14" customWidth="1"/><col min="4" max="4" width="20" customWidth="1"/></cols><sheetData><row r="1">${cells}</row><row r="2"></row></sheetData><autoFilter ref="A1:D1"/></worksheet>`;});
+ const blob=makeStoredZip(files),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Modele_import_StatQualite.xlsx';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);toast('Modèle Excel téléchargé.');}
+
+$('downloadTemplateBtn').addEventListener('click',downloadImportTemplate);
+$('exportJsonBtn').addEventListener('click',exportJson);$('importJsonBtn').addEventListener('click',()=>$('importJsonFile').click());$('importJsonFile').addEventListener('change',e=>{if(e.target.files[0])importJsonFile(e.target.files[0]);e.target.value='';});$('exportCsvBtn').addEventListener('click',exportCsv);$('historyExportCsvBtn').addEventListener('click',exportCsv);
+$('dataImportFile').addEventListener('change',e=>{if(e.target.files[0])handleDataFile(e.target.files[0]);});
+$('importConfig').addEventListener('change',e=>{if(e.target.id==='importSheet'){importDraft.sheetIndex=Number(e.target.value);importDraft.mapping=null;buildImportConfig();}else if(['importHasHeader','mapId','mapCadn','mapDate','mapModality'].includes(e.target.id)){if(e.target.id==='importHasHeader')importDraft.hasHeader=e.target.checked;importDraft.mapping={id:Number($('mapId').value),cadn:Number($('mapCadn').value),date:Number($('mapDate').value),modality:Number($('mapModality').value)};buildImportConfig();}});
+$('importConfig').addEventListener('click',e=>{if(e.target.id==='clearImportBtn'){importDraft=null;$('dataImportFile').value='';$('importConfig').classList.add('hidden');$('importMessage').textContent='Choisis un fichier CSV ou XLSX.';}else if(e.target.id==='refreshImportPreview'){refreshImportPreview();}else if(e.target.id==='commitImportBtn'){commitDataImport();}});
+$('importCard').addEventListener('change',()=>{if(importDraft)refreshImportPreview();});$('importMode').addEventListener('change',()=>{if(importDraft)refreshImportPreview();});
+// Save current UI selection and ensure the first view reflects the stored data.
+state.selectedCard=activeCard;save();renderDashboard();
+})();
+</script>
+</body>
+</html>
